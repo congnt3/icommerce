@@ -1,0 +1,132 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  infrastructure
+
+  SAM Template for icommerce infrastructure
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 60
+Parameters:
+  InfrastructureStackName:
+    Type: String
+    Description: The stack name of the infrastructure stack deployed the DynamoDB tables
+    AllowedPattern: "[a-zA-Z1-9-]*"
+Resources:
+  RetrieveShoppingCartFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: .
+      Handler: org.springframework.cloud.function.adapter.aws.FunctionInvoker::handleRequest
+      Runtime: java8
+      MemorySize: 512
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          SPRING_CLOUD_FUNCTION_DEFINITION: retrieveCartFunction
+          MAIN_CLASS: com.nab.icommerce.shoppingcart.ShoppingCartApplication
+          SPRING_PROFILES_ACTIVE: default
+      Events:
+        RetrieveShoppingCart:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /shopping-cart
+            Method: post
+  AddToShoppingCartFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: .
+      Handler: org.springframework.cloud.function.adapter.aws.FunctionInvoker::handleRequest
+      Runtime: java8
+      MemorySize: 512
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          SPRING_CLOUD_FUNCTION_DEFINITION: saveCartItemFunction
+          MAIN_CLASS: com.nab.icommerce.shoppingcart.ShoppingCartApplication
+          SPRING_PROFILES_ACTIVE: default
+      Events:
+        RetrieveShoppingCart:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /shopping-cart/add
+            Method: post
+  RemoveFromShoppingCartFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: .
+      Handler: org.springframework.cloud.function.adapter.aws.FunctionInvoker::handleRequest
+      Runtime: java8
+      MemorySize: 512
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          SPRING_CLOUD_FUNCTION_DEFINITION: deleteCartItemFunction
+          MAIN_CLASS: com.nab.icommerce.shoppingcart.ShoppingCartApplication
+          SPRING_PROFILES_ACTIVE: default
+      Events:
+        RetrieveShoppingCart:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /shopping-cart/remove
+            Method: post
+  ShoppingCartFunctionsIAMPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ICommerceShoppingCartFunctionsPolicy
+      PolicyDocument:
+        Statement:
+          - Sid: FunctionsHasCRUDRightOnTableAndIndexes
+            Effect: Allow
+            Action:
+              - "dynamodb:GetItem"
+              - "dynamodb:BatchGetItem"
+              - "dynamodb:Query"
+              - "dynamodb:PutItem"
+              - "dynamodb:UpdateItem"
+              - "dynamodb:DeleteItem"
+              - "dynamodb:BatchWriteItem"
+            Resource:
+              - Fn::ImportValue: !Sub "${InfrastructureStackName}-ShoppingCartTableARN"
+              - Fn::Join:
+                  - '/'
+                  - - Fn::ImportValue:
+                        Fn::Join:
+                          - '-'
+                          - - Ref: InfrastructureStackName
+                            - ShoppingCartTableARN
+                    - 'index/*'
+      Roles:
+        - Ref: RetrieveShoppingCartFunctionRole
+        - Ref: AddToShoppingCartFunctionRole
+        - Ref: RemoveFromShoppingCartFunctionRole
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  RetrieveShoppingCartApi:
+    Description: "API Gateway endpoint URL for Prod stage"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/shopping-cart"
+  RetrieveShoppingCartFunction:
+    Description: "RetrieveShoppingCart Lambda Function ARN"
+    Value: !GetAtt RetrieveShoppingCartFunction.Arn
+  RetrieveShoppingCartFunctionIamRole:
+    Description: "Implicit IAM Role created for RetrieveShoppingCart function"
+    Value: !GetAtt RetrieveShoppingCartFunctionRole.Arn
+  AddToShoppingCartApi:
+    Description: "API Gateway endpoint URL for Prod stage"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/shopping-cart/add"
+  AddToShoppingCartFunction:
+    Description: "AddToShoppingCart Lambda Function ARN"
+    Value: !GetAtt AddToShoppingCartFunction.Arn
+  AddToShoppingCartFunctionIamRole:
+    Description: "Implicit IAM Role created for AddToShoppingCart function"
+    Value: !GetAtt AddToShoppingCartFunctionRole.Arn
+  RemoveFromShoppingCartApi:
+    Description: "API Gateway endpoint URL for Prod stage"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/shopping-cart/remove"
+  RemoveFromShoppingCartFunction:
+    Description: "RemoveFromShoppingCart Lambda Function ARN"
+    Value: !GetAtt RemoveFromShoppingCartFunction.Arn
+  RemoveShoppingCartFunctionIamRole:
+    Description: "Implicit IAM Role created for RemoveFromShoppingCart function"
+    Value: !GetAtt RemoveFromShoppingCartFunctionRole.Arn

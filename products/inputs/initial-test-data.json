@@ -1,0 +1,134 @@
+{
+  "iCommerce-Products": [
+    {
+      "PutRequest": {
+        "Item": {
+          "uuid": {"S":"vbb124btr"},
+          "name": {"S":"Game Controller"},
+          "imagePath": {"S":""},
+          "category": {"S":"Electronics"},
+          "price": {"N":"100"},
+          "brand": {"S":"Sony"},
+          "colour": {"S":"Black"}
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "uuid": {"S":"nvklal433"},
+          "name": {"S":"Black Watch"},
+          "imagePath": {"S":"/images/black-watch.jpg"},
+          "category": {"S":"Accessories"},
+          "price": {"N":"300"},
+          "brand": {"S":"Apple"},
+          "colour": {"S":"Black"}
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "uuid": {"S":"zz21cz3c1"},
+          "name": {"S":"Blue Band"},
+          "imagePath": {"S":"/images/blue-band.jpg"},
+          "category": {"S":"Fitness"},
+          "price": {"N":"30"},
+          "brand": {"S":"Sony"},
+          "colour": {"S":"Blue"}
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "uuid": {"S":"244wgerg2"},
+          "name": {"S":"Blue T-Shirt"},
+          "imagePath": {"S":"/images/blue-tshirt.jpg"},
+          "category": {"S":"Clothing"},
+          "price": {"N":"50"},
+          "brand": {"S":"LV"},
+          "colour": {"S":"Blue"}
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "uuid": {"S":"h456wer53"},
+          "name": {"S":"Bracelet"},
+          "imagePath": {"S":"/images/bracelet.jpg"},
+          "category": {"S":"Accessories"},
+          "price": {"N":"1000"},
+          "brand": {"S":"Hermes"},
+          "colour": {"S":"Gold"}
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "uuid": {"S":"cm230f032"},
+          "name": {"S":"Gaming Set"},
+          "imagePath": {"S":"/images/gaming-set.jpg"},
+          "category": {"S":"Electronics"},
+          "price": {"N":"600"},
+          "brand": {"S":"Nitendo"},
+          "colour": {"S":"Black"}
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "uuid": {"S":"bib36pfvm"},
+          "name": {"S":"Chakra Bracelet"},
+          "imagePath": {"S":"/images/chakra-bracelet.jpg"},
+          "category": {"S":"Accessories"},
+          "price": {"N":"3000"},
+          "brand": {"S":"Tiphany"},
+          "colour": {"S":"Silver"}
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "uuid": {"S":"mbvjkgip5"},
+          "name": {"S":"Galaxy Earrings"},
+          "imagePath": {"S":"/images/Galaxy-Earrings.jpg"},
+          "category": {"S":"Accessories"},
+          "price": {"N":"500"},
+          "brand": {"S":"Tiphany"},
+          "colour": {"S":"Gold"}
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "uuid": {"S":"f230fh0g3"},
+          "name": {"S":"Bamboo Watch"},
+          "imagePath": {"S":"/images/Bamboo-Watch.jpg"},
+          "category": {"S":"Accessories"},
+          "price": {"N":"300"},
+          "brand": {"S":"Samsung"},
+          "colour": {"S":"Green"}
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "uuid": {"S":"av2231fwg"},
+          "name": {"S":"Brown Purse"},
+          "imagePath": {"S":"/images/Brown-Purse.jpg"},
+          "category": {"S":"Accessories"},
+          "price": {"N":"700"},
+          "brand": {"S":"Coach"},
+          "colour": {"S":"Brown"}
+        }
+      }
+    }
+  ]
+}

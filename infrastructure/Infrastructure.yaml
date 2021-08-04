@@ -1,0 +1,83 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CFN Template for creating iCommerce database tables
+Resources:
+  ProductTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: iCommerce-Products
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: uuid
+          AttributeType: S
+        - AttributeName: category
+          AttributeType: S
+        - AttributeName: brand
+          AttributeType: S
+        - AttributeName: colour
+          AttributeType: S
+      KeySchema:
+        - AttributeName: uuid
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        -
+          IndexName: "GSI_By_Category"
+          KeySchema:
+            - AttributeName: category
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 0
+            WriteCapacityUnits: 0
+        - IndexName: "GSI_By_Brand"
+          KeySchema:
+            - AttributeName: brand
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 0
+            WriteCapacityUnits: 0
+        - IndexName: "GSI_By_Colour"
+          KeySchema:
+            - AttributeName: colour
+              KeyType: HASH
+          Projection:
+            PrProvisionedThroughput:
+              ojectionType: ALL
+            ReadCapacityUnits: 0
+            WriteCapacityUnits: 0
+  ShoppingCartTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: iCommerce-Shopping-Cart
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: UserId
+          AttributeType: S
+        - AttributeName: AddedDate
+          AttributeType: N
+      KeySchema:
+        - AttributeName: UserId
+          KeyType: HASH
+        - AttributeName: AddedDate
+          KeyType: RANGE
+Outputs:
+  ProductTableARN:
+    Description: "Arn of the created Product table"
+    Value: !GetAtt ProductTable.Arn
+    Export:
+      Name:
+        Fn::Join:
+          - '-'
+          - - Ref: 'AWS::StackName'
+            - ProductTableARN
+  ShoppingCartTableARN:
+    Description: "Arn of the created ShoppingCart table"
+    Value: !GetAtt ShoppingCartTable.Arn
+    Export:
+      Name:
+        Fn::Join:
+          - '-'
+          - - Ref: 'AWS::StackName'
+            - ShoppingCartTableARN

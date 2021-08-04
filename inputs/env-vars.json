@@ -1,0 +1,6 @@
+{
+  "Parameters": {
+    "APP_DYNAMODB_REGION": "ap-southeast-1",
+    "APP_DYNAMODB_ENDPOINT": "http://dynamodb-local:8000"
+  }
+}

@@ -1,0 +1,129 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  infrastructure
+
+  SAM Template for icommerce infrastructure
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 60
+Parameters:
+  InfrastructureStackName:
+    Type: String
+    Description: The stack name of the infrastructure stack deployed the DynamoDB tables
+    AllowedPattern: "[a-zA-Z1-9-]*"
+Resources:
+  QueryProductFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: .
+      Handler: org.springframework.cloud.function.adapter.aws.FunctionInvoker::handleRequest
+      Runtime: java8
+      MemorySize: 512
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          SPRING_CLOUD_FUNCTION_DEFINITION: queryProductFunction
+          MAIN_CLASS: com.nab.icommerce.products.ProductsApplication
+          SPRING_PROFILES_ACTIVE: default
+      Events:
+        QueryProduct:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /products/find
+            Method: post
+  GetProductFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: .
+      Handler: org.springframework.cloud.function.adapter.aws.FunctionInvoker::handleRequest
+      Runtime: java8
+      MemorySize: 512
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          SPRING_CLOUD_FUNCTION_DEFINITION: getProductFunction
+          MAIN_CLASS: com.nab.icommerce.products.ProductsApplication
+          SPRING_PROFILES_ACTIVE: default
+      Events:
+        QueryProduct:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /products/get-product
+            Method: post
+  GetAllProductsFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: .
+      Handler: org.springframework.cloud.function.adapter.aws.FunctionInvoker::handleRequest
+      Runtime: java8
+      MemorySize: 512
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          SPRING_CLOUD_FUNCTION_DEFINITION: getAllProductsFunction
+          MAIN_CLASS: com.nab.icommerce.products.ProductsApplication
+          SPRING_PROFILES_ACTIVE: default
+      Events:
+        QueryProduct:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /products
+            Method: get
+  QueryProductFunctionIAMPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ICommerceProductFunctionsPolicy
+      PolicyDocument:
+        Statement:
+          - Sid: QueryProductFunctionHasQueryRightOnTableAndIndexes
+            Effect: Allow
+            Action:
+              - "dynamodb:GetItem"
+              - "dynamodb:BatchGetItem"
+              - "dynamodb:Query"
+              - "dynamodb:Scan"
+            Resource:
+              - Fn::ImportValue: !Sub "${InfrastructureStackName}-ProductTableARN"
+              - Fn::Join:
+                    - '/'
+                    - - Fn::ImportValue:
+                          Fn::Join:
+                            - '-'
+                            - - Ref: InfrastructureStackName
+                              - ProductTableARN
+                      - 'index/*'
+      Roles:
+        - Ref: QueryProductFunctionRole
+        - Ref: GetProductFunctionRole
+        - Ref: GetAllProductsFunctionRole
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  QueryProductApi:
+    Description: "API Gateway endpoint URL for Prod stage"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/products/find"
+  QueryProductFunction:
+    Description: "QueryProduct Lambda Function ARN"
+    Value: !GetAtt QueryProductFunction.Arn
+  QueryProductFunctionIamRole:
+    Description: "Implicit IAM Role created for QueryProduct function"
+    Value: !GetAtt QueryProductFunctionRole.Arn
+  GetProductApi:
+    Description: "API Gateway endpoint URL for Prod stage"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/products/get-product"
+  GetProductFunction:
+    Description: "GetProduct Lambda Function ARN"
+    Value: !GetAtt QueryProductFunction.Arn
+  GetProductFunctionIamRole:
+    Description: "Implicit IAM Role created for GetProduct function"
+    Value: !GetAtt GetProductFunctionRole.Arn
+  GetAllProductsApi:
+    Description: "API Gateway endpoint URL for Prod stage"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/products"
+  GetAllProductsFunction:
+    Description: "GetAllProducts Lambda Function ARN"
+    Value: !GetAtt GetAllProductsFunction.Arn
+  GetAllProductsFunctionIamRole:
+    Description: "Implicit IAM Role created for GetAllProducts function"
+    Value: !GetAtt GetAllProductsFunctionRole.Arn

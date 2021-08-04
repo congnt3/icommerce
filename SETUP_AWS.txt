@@ -1,0 +1,77 @@
+#On Mac or Linux machine
+#1. Install AWS CLI
+#2. Install AWS SAM CLI following guide at https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html
+#3. Configure authentication for AWS CLI following https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html, with a AWS user having permission to create DynamoDB table, Lambda functions and IAM role, policy
+#4. change working directory to folder containing this README file and execute following commands
+
+$aws cloudformation create-stack --stack-name icommerce-infra --template-body file://infrastructure/infrastructure.yaml --capabilities CAPABILITY_IAM
+
+#To deploy the product services to AWS
+$cd products
+$sam build
+$sam deploy --guided
+follow the guided deployment with following parameters:
+	- Stack Name [icommerce-product-services]: icommerce-product-services
+    - AWS Region [ap-southeast-1]: (any preferred aws region, must same as the created "icommerce-infra" deployed)
+    - Parameter InfrastructureStackName [icommerce-infra]: icommerce-infra
+    - #Shows you resources changes to be deployed and require a 'Y' to initiate deploy
+    - Confirm changes before deploy [y/N]: N
+    - #SAM needs permission to be able to create roles to connect to the resources in your template
+    - Allow SAM CLI IAM role creation [Y/n]: Y
+    - QueryProductFunction may not have authorization defined, Is this okay? [y/N]: y
+    - GetProductFunction may not have authorization defined, Is this okay? [y/N]: y
+    - GetAllProductsFunction may not have authorization defined, Is this okay? [y/N]: y
+    - Save arguments to configuration file [Y/n]: y
+    - SAM configuration file [samconfig.toml]:
+    - SAM configuration environment [default]:
+
+The service endpoint URLs are returned in the Cloudformation Stack 'icommerce-product-services'
+You can use the following command and look at the Outputs section of the returned result:
+aws cloudformation describe-stacks --stack-name icommerce-product-services
+
+#To deploy the shopping-cart services to AWS
+$cd ../shopping-cart
+$sam build
+$sam deploy --guided
+follow the guided deployment with following parameters:
+	- Stack Name [icommerce-shoppingcart-services]: icommerce-shoppingcart-services
+    - AWS Region [ap-southeast-1]: (any preferred aws region, must same as the created "icommerce-infra" deployed)
+    - Parameter InfrastructureStackName [icommerce-infra]: icommerce-infra
+    - #Shows you resources changes to be deployed and require a 'Y' to initiate deploy
+    - Confirm changes before deploy [y/N]: N
+    - #SAM needs permission to be able to create roles to connect to the resources in your template
+    - Allow SAM CLI IAM role creation [Y/n]: Y
+    - QueryProductFunction may not have authorization defined, Is this okay? [y/N]: y
+    - GetProductFunction may not have authorization defined, Is this okay? [y/N]: y
+    - GetAllProductsFunction may not have authorization defined, Is this okay? [y/N]: y
+    - Save arguments to configuration file [Y/n]: y
+    - SAM configuration file [samconfig.toml]:
+    - SAM configuration environment [default]:
+The service endpoint URLs are returned in the Cloudformation Stack 'icommerce-shoppingcart-services'
+You can use the following command and look at the Outputs section of the returned result:
+aws cloudformation describe-stacks --stack-name icommerce-shoppingcart-services
+
+curl https://1l1hvwfypf.execute-api.ap-southeast-1.amazonaws.com/Prod/products
+curl https://1l1hvwfypf.execute-api.ap-southeast-1.amazonaws.com/Prod/products/get-product
+curl https://1l1hvwfypf.execute-api.ap-southeast-1.amazonaws.com/Prod/products/find
+
+#Get all products:
+curl https://1l1hvwfypf.execute-api.ap-southeast-1.amazonaws.com/Prod/products
+
+#Get specific product by its uuid:
+curl -d '{"uuid": "zz21cz3c1"}' https://1l1hvwfypf.execute-api.ap-southeast-1.amazonaws.com/Prod/products/get-product
+
+#Query product:
+curl -d '{"category":"Accessories","price":{"comparisonOperand":"<","value":"1000"},"brand":"Apple","colour":"Black"}' https://1l1hvwfypf.execute-api.ap-southeast-1.amazonaws.com/Prod/products/find
+
+#Add new item to shopping cart
+curl -d '{"userId": "a1ef23f5-5a50-4d54-84f7-2887074b8be0","productUuid": "f230fh0g3","quantity": "1"}' https://p76ebz7msl.execute-api.ap-southeast-1.amazonaws.com/Prod/shopping-cart/add
+
+#Add new item to shopping cart
+curl -d '{"userId": "a1ef23f5-5a50-4d54-84f7-2887074b8be0", "addedDate": 1628046399728, "productUuid": "f230fh0g3","quantity": "1"}' https://p76ebz7msl.execute-api.ap-southeast-1.amazonaws.com/Prod/shopping-cart/add
+
+#Remove item from my shopping cart
+curl -d '{"userId": "a1ef23f5-5a50-4d54-84f7-2887074b8be0", "addedDate": 1628046399728 }' https://p76ebz7msl.execute-api.ap-southeast-1.amazonaws.com/Prod/shopping-cart/remove
+
+#Retrieve my shopping cart
+curl -d '{"userId": "a1ef23f5-5a50-4d54-84f7-2887074b8be0"}' https://p76ebz7msl.execute-api.ap-southeast-1.amazonaws.com/Prod/shopping-cart

@@ -1,0 +1,10 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "icommerce-shopping-cart-services"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-wtadf6f0uyji"
+s3_prefix = "icommerce-shopping-cart-services"
+region = "ap-southeast-1"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "InfrastructureStackName=\"icommerce-infra\""
